@@ -6,8 +6,22 @@ const router = express.Router();
 
 // add endpoints here
 router.get('/', (req, res) => {
-    Film.find() 
-    .then( films => {
+    let query = Film.find() 
+    const { producer, released} = req.query;
+    // order by episode.
+    query.sort('episode')
+    // Find all films produced by Gary Kurtz (/api/films?producer=gary+kurtz)
+    if( producer !== undefined){
+        query.where({"producer": RegExp(producer, 'i')}) //i ignores uppercase/lowercase
+    }
+
+// Find all films released in 2005. (/api/films?released=2005)
+    if(released !== undefined) {
+        query.where({'release_date': {$regex: released}}) //, $options: 'i'
+    }
+
+// Return a list of all films. (/api/films)
+    query.then( films => {
         res.status(200).json(films);
     })
     .catch(err => {res.status(500).json({errorMessage: "Information could not be retrieved"})
@@ -17,15 +31,15 @@ router.get('/', (req, res) => {
 module.exports = router;
 
 
-// Return a list of all films. (/api/films)
 
-// order by episode.
+
+
 // populate character information.
 // only include: _id, name, gender, height, skin_color, hair_color and eye_color.
 // populate planets, include: name, climate, terrain, gravity and diameter.
-// Find all films produced by Gary Kurtz (/api/films?producer=gary+kurtz)
 
-// Find all films released in 2005. (/api/films?released=2005)
+
+
 
 // Given a character id, (/api/characters/:id)
 
